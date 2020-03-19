@@ -68,4 +68,3 @@ def ml_loop():
             else:
                 comm.send_instruction(scene_info.frame, PlatformAction.NONE)
 
-        print(scene_info.ball)
