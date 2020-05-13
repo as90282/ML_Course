@@ -36,12 +36,13 @@ def ml_loop(side: str):
 
 
     def ml_loop_for_1P():
-        speed = [7 + (scene_info["frame"]//100),7 + (scene_info["frame"]//100)]
+        speed = [7 + (scene_info["frame"]//200),7 + (scene_info["frame"]//200)]
         if scene_info["ball_speed"][0] > speed[0]  :
             speed[0] = scene_info["ball_speed"][0]
         elif scene_info["ball_speed"][0] < -speed[0] :
             speed[0] = -scene_info["ball_speed"][0]
         if scene_info["ball"][1] == 80  : # 球正在向下 # ball goes down
+            h1 = (155//speed[1])
             h = (175 // speed[1])
             b_x = scene_info["blocker"][0]+ scene._blocker._speed[0]*(h+1)
             if b_x > 170 :
@@ -52,9 +53,10 @@ def ml_loop(side: str):
                 y1 = (195-scene_info["ball"][0]) // speed[0]
                 y1_pred = 80 + speed[1]*(y1+1)
                 if y1_pred < 260 :
-                    y_b = 80 + speed[1]*h
-                    h_x1 = 195 - speed[1]*(h-y1-1)
-                    if 235-y_b<= h_x1-(b_x+30) and 260-y_b >= h_x1-(b_x+30):
+                    y_b = 80 + speed[1]*h1
+                    h_x1 = 195 - speed[1]*(h1-y1-1)
+                    h_x2 = 195 - speed[1]*(h-y1-1)
+                    if (235-y_b<= h_x1-(b_x+30) and 260-y_b >= h_x1-(b_x+30)) or (h_x2>b_x+30 and h_x2< b_x+30+speed[0]+scene._blocker._speed[0]):
                         y3_pred = y_b + (195-(b_x+30))
                         if 415-y3_pred > 195 :
                             y4 = 195 // speed[1]
@@ -170,9 +172,27 @@ def ml_loop(side: str):
                     return x_pred
                 return x_pred
 
-        elif scene_info["ball_speed"][1] < 0 and scene_info["ball"][1] < 250 :
+        elif scene_info["ball_speed"][1] < 0 and scene_info["ball"][1] < 260 :
             x_pred = 100
             return x_pred
+        elif (scene_info["blocker"][0] > 30 and scene_info["blocker"][0] < 60 and scene_info["ball"][1]<240 and scene_info["ball"][1]>180) or (scene_info["blocker"][0] > 140 and scene_info["blocker"][0] < 170 and scene_info["ball"][1]<240 and scene_info["ball"][1]>180) :
+            x_pred = 100
+            return x_pred
+        elif scene_info["ball_speed"][1] > 0 and scene_info["ball"][1] > 240 : # 球正在向下 # ball goes down
+            x = ( scene_info["platform_1P"][1]-scene_info["ball"][1] ) // scene_info["ball_speed"][1] # 幾個frame以後會需要接  # x means how many frames before catch the ball
+            pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
+            bound = pred // 200 # Determine if it is beyond the boundary
+            if (bound > 0): # pred > 200 # fix landing position
+                if (bound%2 == 0) : 
+                    pred = pred - bound*200                    
+                else :
+                    pred = 200 - (pred - 200*bound)
+            elif (bound < 0) : # pred < 0
+                if (bound%2 ==1) :
+                    pred = abs(pred - (bound+1) *200)
+                else :
+                    pred = pred + (abs(bound)*200)
+            return pred
         
 
 
