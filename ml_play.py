@@ -3,6 +3,7 @@ The template of the script for the machine learning process in game pingpong
 """
 
 # Import the necessary modules and classes
+from games.pingpong.game import gamecore
 from mlgame.communication import ml as comm
 
 def ml_loop(side: str):
@@ -18,9 +19,10 @@ def ml_loop(side: str):
     ```
     @param side The side which this script is executed for. Either "1P" or "2P".
     """
-
+    
     # === Here is the execution order of the loop === #
     # 1. Put the initialization code here
+    scene = gamecore.Scene("HARD")
     ball_served = False
     def move_to(player, pred) : #move platform to predicted position to catch ball 
         if player == '1P':
@@ -31,7 +33,7 @@ def ml_loop(side: str):
             if scene_info[" platform_2P"][0]+20  > (pred-10) and scene_info["platform_2P"][0]+20 < (pred+10): return 0 # NONE
             elif scene_info["platform_2P"][0]+20 <= (pred-10) : return 1 # goes right
             else : return 2 # goes left
-    
+
 
     def ml_loop_for_1P():
         speed = [7 + (scene_info["frame"]//100),7 + (scene_info["frame"]//100)]
@@ -41,7 +43,7 @@ def ml_loop(side: str):
             speed[0] = -scene_info["ball_speed"][0]
         if scene_info["ball"][1] == 80  : # 球正在向下 # ball goes down
             h = (175 // speed[1])
-            b_x = scene_info["blocker"][0]+scene_info["blocker_speed"][0]*(h+1)
+            b_x = scene_info["blocker"][0]+ scene._blocker._speed[0]*(h+1)
             if b_x > 170 :
                 b_x = 170 - 30*((b_x - 170)//30)
             elif b_x < 0 :
